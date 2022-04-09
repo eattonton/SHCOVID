@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)http://hizzgdev.github.io/jsmind/example/1_basic.html -->
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>jsMind</title>
+    <link type="text/css" rel="stylesheet" href="./js/jsmind.css">
+    <style type="text/css">
+        #jsmind_container {
+
+            border: solid 1px #ccc;
+            /*background:#f4f4f4;*/
+            background: #f4f4f4;
+            display: block;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="jsmind_container">
+        <div class="jsmind-inner" tabindex="1">
+            <canvas class="jsmind" id="jsmind"></canvas>
+        </div>
+    </div>
+    <script type="text/javascript" src="./js/jsmind.js"></script>
+    <script type="text/javascript" src="./js/jsmind.draggable.js"></script>
+    <script type="text/javascript">
+        var mind = {
+            "meta": {
+                "name": "demo",
+                "author": "eattonton@qq.com",
+                "version": "1.0",
+            },
+            "format": "node_array",
+            "data": [
+                { "id": "root", "isroot": true, "topic": "上海发布" },
+                { "id": "浦东新区", "parentid": "root", "topic": "浦东新区","expanded": false },
+                { "id": "黄浦区", "parentid": "root", "topic": "黄浦区","expanded": false  },
+                { "id": "静安区", "parentid": "root", "topic": "静安区","expanded": false  },
+                { "id": "徐汇区", "parentid": "root", "topic": "徐汇区","expanded": false  },
+                { "id": "长宁区", "parentid": "root", "topic": "长宁区","expanded": false  },
+                { "id": "普陀区", "parentid": "root", "topic": "普陀区","expanded": false  },
+                { "id": "虹口区", "parentid": "root", "topic": "虹口区","expanded": false  },
+                { "id": "杨浦区", "parentid": "root", "topic": "杨浦区","expanded": false  },
+                { "id": "宝山区", "parentid": "root", "topic": "宝山区","expanded": false  },
+                { "id": "闵行区", "parentid": "root", "topic": "闵行区","expanded": false  },
+                { "id": "嘉定区", "parentid": "root", "topic": "嘉定区","expanded": false  },
+                { "id": "金山区", "parentid": "root", "topic": "金山区","expanded": false  },
+                { "id": "松江区", "parentid": "root", "topic": "松江区","expanded": false  },
+                { "id": "青浦区", "parentid": "root", "topic": "青浦区","expanded": false  },
+                { "id": "奉贤区", "parentid": "root", "topic": "奉贤区","expanded": false  },
+                { "id": "崇明区", "parentid": "root", "topic": "崇明区","expanded": false  },
+            ]
+        };
+
+        function load_jsmind() {
+
+            var options = {
+                container: 'jsmind_container',
+                editable: false,
+                theme: 'primary'
+            }
+            var jm = jsMind.show(options, mind);
+            // jm.set_readonly(true);
+            // var mind_data = jm.get_data();
+            // alert(mind_data);
+            //jm.add_node("sub2", "sub23", "new node", { "background-color": "red" });
+            //jm.set_node_color('sub21', 'green', '#ccc');
+        }
+        
+        function open_ajax() {
+            var mind_url = './example.json';
+            jsMind.util.ajax.get(mind_url, function (datas) {
+                let subKeys = new Array();
+                for(let i=0,len=datas.length;i<len;i++){
+                    let item0 = datas[i];
+                    let key0 = item0["area"].substring(0,1);
+                    if(subKeys.indexOf(key0) == -1){
+                        mind["data"].push({ "id":key0, "parentid": item0["zone"], "topic": key0,"expanded": false });
+                        subKeys.push(key0);
+                    }
+                    mind["data"].push({ "id":item0["area"], "parentid": key0, "topic": item0["area"]});
+                    for(let j=0,len2=item0["d"].length; j< len2;j++){
+                        mind["data"].push({ "id":item0["area"]+item0["d"][j], "parentid": item0["area"], "topic": item0["d"][j], "background-color":"coral"});
+                    }
+                    
+                }
+                load_jsmind();
+            });
+        }
+
+        window.onload = function () {
+            const canvas = document.getElementById("jsmind");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // const div0 = document.getElementById("jsmind_container");
+            // div0.width = window.innerWidth;
+            // div0.height = window.innerHeight;
+
+            //load_jsmind();
+            open_ajax();
+
+        }
+
+    </script>
+
+</body>
+
+</html>
