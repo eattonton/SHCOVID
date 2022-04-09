@@ -72,6 +72,11 @@ def GetSpanLines(url):
  
 if __name__ == "__main__":
     urls = []
+    urls.append({"d":"2022-04-01","url":"https://mp.weixin.qq.com/s/gQDyFLtdILP2NuSBgcjUxg"})
+    urls.append({"d":"2022-04-02","url":"https://mp.weixin.qq.com/s/2VWTo6e9gmWJ0vxeZ4PhIw"})
+    urls.append({"d":"2022-04-03","url":"https://mp.weixin.qq.com/s/uj4TYASUn2YJZQMg2aUvdw"})
+    urls.append({"d":"2022-04-04","url":"https://mp.weixin.qq.com/s/MkKsQkgvUWbwj8z9jG_Zng"})
+    urls.append({"d":"2022-04-05","url":"https://mp.weixin.qq.com/s/djwW3S9FUYBE2L5Hj94a3A"})
     urls.append({"d":"2022-04-06","url":"https://mp.weixin.qq.com/s/8bljTUplPh1q4MXb6wd_gg"})
     urls.append({"d":"2022-04-07","url":"https://mp.weixin.qq.com/s/HTM47mUp0GF-tWXkPeZJlg"})
     urls.append({"d":"2022-04-08","url":"https://mp.weixin.qq.com/s/79NsKhMHbg09Y0xaybTXjA"})
@@ -112,11 +117,11 @@ if __name__ == "__main__":
                 if zone2 != "":
                     zone1 = zone2
                 if zone1 != "" and isinstance(str2,str) and len(str2) < 20 and "落实终末消毒措施" not in str2:
-                    findarea(oUrl["d"], zone1, str2.replace(' ', '').replace('，', '').replace('。', '').replace('、', '').replace('\u00a0',''))
+                    findarea(oUrl["d"], zone1, str2.replace(' ', '').replace('，', '').replace('。', '').replace('、', '').replace(',', '').replace('\u00a0',''))
 
     if childrens and len(childrens) > 0:
         #排序
-        childrens.sort(key=lambda x: lazy_pinyin(x["area"][0])[0][0])
+        childrens.sort(key=lambda x: (lazy_pinyin(x["area"][0])[0][0],lazy_pinyin(x["area"][1])[0][0]))
         #输出
         objResult["zones"]=zones
         objResult["childrens"]=childrens

@@ -9,7 +9,7 @@
     <title>上海疫情来自上海发布</title>
     <link type="text/css" rel="stylesheet" href="./js/jsmind.css">
     <style type="text/css">
-        *{
+        * {
             margin: 0;
             padding: 0;
         }
@@ -30,6 +30,7 @@
             <canvas class="jsmind" id="jsmind"></canvas>
         </div>
     </div>
+    <script type="text/javascript" src="./js/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="./js/jsmind.js"></script>
     <script type="text/javascript" src="./js/jsmind.draggable.js"></script>
     <script type="text/javascript">
@@ -42,49 +43,92 @@
             "format": "node_array",
             "data": [
                 { "id": "root", "isroot": true, "topic": "上海发布" },
-               
+
             ]
         };
 
+        var dataSubArea = {};
+        var jm = null;
+        //加载思维导图树
         function load_jsmind() {
-
             var options = {
                 container: 'jsmind_container',
-                editable: false,
+                editable: true,
                 theme: 'primary'
             }
-            var jm = jsMind.show(options, mind);
+            jm = jsMind.show(options, mind);
             // jm.set_readonly(true);
             // var mind_data = jm.get_data();
             // alert(mind_data);
             //jm.add_node("sub2", "sub23", "new node", { "background-color": "red" });
             //jm.set_node_color('sub21', 'green', '#ccc');
+            //加上点击事件
+            $("#jsmind_container").on("click", 'jmnode', function () {
+                //alert($(this).text());
+                //console.log($(this).attr("nodeid"))
+                add_SelectedNode($(this).attr("nodeid"));
+            });
+
         }
-        
+
+        function add_SelectedNode(key0){
+            if(dataSubArea.hasOwnProperty(key0)){
+                let subNds = new Array();
+                for (let i = 0, len = dataSubArea[key0].length; i < len; i++) {
+                    let nd2= jm.add_node(dataSubArea[key0][i]["parentid"],dataSubArea[key0][i]["id"],dataSubArea[key0][i]["topic"]);
+                    if(dataSubArea[key0][i]["parentid"] == key0){
+                        subNds.push(nd2);
+                    }
+                }
+
+                for (let i = 0, len = subNds.length; i < len; i++) {
+                    jm.collapse_node(subNds[i]);
+                }
+
+                //添加完之后清空 避免重复添加
+                delete dataSubArea[key0];
+                 
+            }
+        }
+
         function open_ajax() {
             var mind_url = './example.json';
             jsMind.util.ajax.get(mind_url, function (res) {
                 let subKeys = new Array();
                 let zones = res.zones;
                 //区
-                for(let i=0,len=zones.length;i<len;i++){
-                    mind["data"].push({ "id":zones[i], "parentid": "root", "topic": zones[i],"expanded": false });
+                for (let i = 0, len = zones.length; i < len; i++) {
+                    mind["data"].push({ "id": zones[i], "parentid": "root", "topic": zones[i], "expanded": false });
                 }
                 //输出居住区域
                 let datas = res.childrens;
-                for(let i=0,len=datas.length;i<len;i++){
+                for (let i = 0, len = datas.length; i < len; i++) {
                     let item0 = datas[i];
-                    let key0 = item0["area"].substring(0,1);
-                    if(subKeys.indexOf(key0) == -1){
+                    let key0 = item0["zone"] + item0["area"].substring(0, 1);
+                    let txtKey0 = item0["area"].substring(0, 1);
+                    if (subKeys.indexOf(key0) == -1) {
                         //填加索引字段
-                        mind["data"].push({ "id":key0, "parentid": item0["zone"], "topic": key0,"expanded": false });
+                        mind["data"].push({ "id": key0, "parentid": item0["zone"], "topic": txtKey0, "expanded": false });
                         subKeys.push(key0);
                     }
-                    mind["data"].push({ "id":item0["area"], "parentid": key0, "topic": item0["area"],"expanded": false});
-                    for(let j=0,len2=item0["d"].length; j< len2;j++){
-                        mind["data"].push({ "id":item0["area"]+item0["d"][j], "parentid": item0["area"], "topic": item0["d"][j], "background-color":"coral"});
+
+                    if (dataSubArea.hasOwnProperty(key0) == false) {
+                        dataSubArea[key0] = [];
                     }
-                    
+
+                    dataSubArea[key0].push({ "id": item0["area"], "parentid": key0, "topic": item0["area"], "expanded": false });
+                    let key1 = item0["area"];
+                    //日期
+                    for (let j = 0, len2 = item0["d"].length; j < len2; j++) {
+                        if (dataSubArea.hasOwnProperty(key1) == false) {
+                            dataSubArea[key1] = [];
+                        }
+                        dataSubArea[key1].push({ "id": key1 + item0["d"][j], "parentid": key1, "topic": item0["d"][j], "background-color": "coral" });
+                    }
+
+                    //mind["data"].push({ "id":item0["area"], "parentid": key0, "topic": item0["area"],"expanded": false});
+
+
                 }
                 load_jsmind();
             });
