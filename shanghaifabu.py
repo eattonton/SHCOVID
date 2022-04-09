@@ -72,6 +72,13 @@ def GetSpanLines(url):
  
 if __name__ == "__main__":
     urls = []
+    urls.append({"d":"2022-03-25","url":"https://mp.weixin.qq.com/s/XG03jIjQLLLjaJZ1DD-kAg"})
+    urls.append({"d":"2022-03-26","url":"https://mp.weixin.qq.com/s/JwUn4sVxSvHQs5KoyFn-lw"})
+    urls.append({"d":"2022-03-27","url":"https://mp.weixin.qq.com/s/MfBzdO0bG4fbokKTRCWuIw"})
+    urls.append({"d":"2022-03-28","url":"https://mp.weixin.qq.com/s/656rotFOMeDScnKSt6OmyQ"})
+    urls.append({"d":"2022-03-29","url":"https://mp.weixin.qq.com/s/K6jT1wRMSScBhvxcB2yV4g"})
+    urls.append({"d":"2022-03-30","url":"https://mp.weixin.qq.com/s/SSFVzOSXPTj-aLzR1tdtxw"})
+    urls.append({"d":"2022-03-31","url":"https://mp.weixin.qq.com/s/hnrGo4KvUvxhpjFyiE8-sQ"})
     urls.append({"d":"2022-04-01","url":"https://mp.weixin.qq.com/s/gQDyFLtdILP2NuSBgcjUxg"})
     urls.append({"d":"2022-04-02","url":"https://mp.weixin.qq.com/s/2VWTo6e9gmWJ0vxeZ4PhIw"})
     urls.append({"d":"2022-04-03","url":"https://mp.weixin.qq.com/s/uj4TYASUn2YJZQMg2aUvdw"})
@@ -101,7 +108,7 @@ if __name__ == "__main__":
         if "年" in strArea and "月" in strArea and "日" in strArea:
             return
         for oArea in childrens:
-            if oArea["area"] == strArea:
+            if oArea["area"] == strArea and oArea["zone"] == strZone:
                 if strDate not in oArea["d"]:
                     oArea["d"].append(strDate)
                 return oArea
