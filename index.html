@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SH疫情非官方仅作参考</title>
+    <title>SH-COVID仅作参考</title>
     <link type="text/css" rel="stylesheet" href="./js/jsmind.css">
     <link type="text/css" rel="stylesheet" href="./js/ttui.css">
     <style type="text/css">
@@ -58,6 +58,8 @@
         };
 
         var dlgLoading = null;
+        var dataLevel0 = {};
+        var dataLevel1 = {};
         var dataSubArea = {};
         var jm = null;
 
@@ -118,52 +120,18 @@
         function open_ajax() {
             var mind_url = './example.json';
             jsMind.util.ajax.get(mind_url, function (res) {
-                let subKeys = new Array();
                 let zones = res.zones;
                 //区
                 for (let i = 0, len = zones.length; i < len; i++) {
                     mind["data"].push({ "id": zones[i], "parentid": "root", "topic": zones[i], "expanded": false });
                 }
                 //输出居住区域
-                let datas = res.childrens;
-                for (let i = 0, len = datas.length; i < len; i++) {
-                    let item0 = datas[i];
-                    let key0 = item0["zone"] + item0["area"].substring(0, 1);
-                    let txtKey0 = item0["area"].substring(0, 1);
-                    if (subKeys.indexOf(key0) == -1) {
-                        //填加索引字段
-                        mind["data"].push({ "id": key0, "parentid": item0["zone"], "topic": txtKey0, "expanded": false });
-                        subKeys.push(key0);
-                    }
-
-                    if (dataSubArea.hasOwnProperty(key0) == false) {
-                        dataSubArea[key0] = [];
-                    }
-                    //区+具体地址
-                    let key1 = item0["zone"] +item0["area"];
-                    dataSubArea[key0].push({ "id": key1, "parentid": key0, "topic": item0["area"], "expanded": false });
-                    //日期
-                    for (let j = 0, len2 = item0["d"].length; j < len2; j++) {
-                        if (dataSubArea.hasOwnProperty(key1) == false) {
-                            dataSubArea[key1] = [];
-                        }
-                        dataSubArea[key1].push({ "id": key1 + item0["d"][j], "parentid": key1, "topic": item0["d"][j], "background-color": "deepskyblue"});
-                        //计算最近一次发现阳性的天数
-                        if (j == len2 - 1) {
-                            let day1 = getDaySpan(item0["d"][j]);
-                            if(day1 <= 7){
-                                //封控区
-                                dataSubArea[key0][dataSubArea[key0].length - 1]["background-color"] = "red";
-                                dataSubArea[key1][dataSubArea[key1].length - 1]["background-color"] = "red";
-                            }else if(day1 >7 && day1 <= 14){
-                                //管控区
-                                dataSubArea[key0][dataSubArea[key0].length - 1]["background-color"] = "coral";
-                                dataSubArea[key1][dataSubArea[key1].length - 1]["background-color"] = "coral";
-                            }else{
-                                //防范区
-                            }
-                        }
-                    }
+                collactLevel0(res.childrens);
+                for(let k0 in dataLevel0){
+                    mind["data"].push(dataLevel0[k0]);
+                }
+                for(let k1 in dataLevel1){
+                    mind["data"].push(dataLevel1[k1]);
                 }
                 load_jsmind();
                 //记录日期
@@ -172,6 +140,76 @@
                     dlgLoading.Close();
                 }
             });
+        }
+
+        //添加子集 并 分类
+        function collactLevel0(datas) {
+            for (let i = 0, len = datas.length; i < len; i++) {
+                let item0 = datas[i];
+                let key0 = item0["zone"] + item0["area"].substring(0, 1);
+                let txtKey0 = item0["area"].substring(0, 1);
+                if (dataLevel0.hasOwnProperty(key0) == false) {
+                    //填加索引字段
+                    dataLevel0[key0] = { "id": key0, "parentid": item0["zone"], "topic": txtKey0, "expanded": false };
+                }
+
+                if (dataSubArea.hasOwnProperty(key0) == false) {
+                    dataSubArea[key0] = [];
+                }
+                //区+具体地址
+                let key1 = item0["zone"] + item0["area"];
+                dataSubArea[key0].push({ "id": key1, "parentid": key0, "topic": item0["area"], "expanded": false });
+                //日期
+                for (let j = 0, len2 = item0["d"].length; j < len2; j++) {
+                    if (dataSubArea.hasOwnProperty(key1) == false) {
+                        dataSubArea[key1] = [];
+                    }
+                    dataSubArea[key1].push({ "id": key1 + item0["d"][j], "parentid": key1, "topic": item0["d"][j], "background-color": "deepskyblue" });
+                    //计算最近一次发现阳性的天数
+                    if (j == len2 - 1) {
+                        let day1 = getDaySpan(item0["d"][j]);
+                        if (day1 <= 7) {
+                            //封控区
+                            dataSubArea[key0][dataSubArea[key0].length - 1]["background-color"] = "red";
+                            dataSubArea[key1][dataSubArea[key1].length - 1]["background-color"] = "red";
+                        } else if (day1 > 7 && day1 <= 14) {
+                            //管控区
+                            dataSubArea[key0][dataSubArea[key0].length - 1]["background-color"] = "coral";
+                            dataSubArea[key1][dataSubArea[key1].length - 1]["background-color"] = "coral";
+                        } else {
+                            //防范区
+                        }
+                    }
+                }
+            }
+
+            //如果数量多 就分二级
+            for(let k0 in dataSubArea){
+                if(dataSubArea[k0].length > 10){
+                    collactLevel1(k0, dataSubArea[k0]);
+                    delete dataSubArea[k0];
+                }
+            }
+        }
+        //如果分一层数量太多，就分二层
+        function collactLevel1(key0, datas){
+            //提取关键字
+            for(let i=0,len=datas.length; i< len;i++){
+                let item1 = datas[i];
+                let key1 = key0 + item1["topic"].substring(1, 2);
+                let txtKey1 = item1["topic"].substring(0, 2);
+                if (dataLevel1.hasOwnProperty(key1) == false) {
+                    //填加索引字段
+                    dataLevel1[key1] = { "id": key1, "parentid": key0, "topic": txtKey1, "expanded": false };
+                }
+
+                //修改当前的地址的父节点
+                item1["parentid"] = key1;
+                if (dataSubArea.hasOwnProperty(key1) == false) {
+                    dataSubArea[key1] = [];
+                }
+                dataSubArea[key1].push(item1);
+            }
         }
 
         window.onload = function () {
