@@ -51,7 +51,7 @@
         init: function () {
             this._create_canvas();
             this._create_shadow();
-            this._event_bind();
+           // this._event_bind();
         },
 
         resize: function () {
