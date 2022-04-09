@@ -8,6 +8,7 @@
         content="width=device-width, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>上海疫情来自上海发布</title>
     <link type="text/css" rel="stylesheet" href="./js/jsmind.css">
+    <link type="text/css" rel="stylesheet" href="./js/ttui.css">
     <style type="text/css">
         * {
             margin: 0;
@@ -20,11 +21,18 @@
             background: #f4f4f4;
             display: block;
         }
+
+        .note {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 
 </head>
 
 <body>
+    <div class="note">非官方发布渠道，仅作参考。以官方数据为准。数据仅来源《上海发布》公众号。</div>
+    <div id="daterecord" class="note"></div>
     <div id="jsmind_container">
         <div class="jsmind-inner" tabindex="1">
             <canvas class="jsmind" id="jsmind"></canvas>
@@ -33,6 +41,7 @@
     <script type="text/javascript" src="./js/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="./js/jsmind.js"></script>
     <script type="text/javascript" src="./js/jsmind.draggable.js"></script>
+    <script type="text/javascript" src="./js/ttui.js"></script>
     <script type="text/javascript">
         var mind = {
             "meta": {
@@ -47,8 +56,22 @@
             ]
         };
 
+        var dlgLoading = null;
         var dataSubArea = {};
         var jm = null;
+
+        //获得时间差，以天为单位
+        function getDaySpan(dayStr1) {
+            var day1 = new Date(dayStr1);
+            var day2 = new Date();
+            var day3 = day2 - day1;
+            var MinMilli = 1000 * 60;  //1分钟
+            var HrMilli = MinMilli * 60;  //小时
+            var DyMilli = HrMilli * 24;  //天
+
+            return Math.round(day3 / DyMilli);
+        }
+
         //加载思维导图树
         function load_jsmind() {
             var options = {
@@ -57,26 +80,27 @@
                 theme: 'primary'
             }
             jm = jsMind.show(options, mind);
-            // jm.set_readonly(true);
-            // var mind_data = jm.get_data();
-            // alert(mind_data);
-            //jm.add_node("sub2", "sub23", "new node", { "background-color": "red" });
             //jm.set_node_color('sub21', 'green', '#ccc');
             //加上点击事件
             $("#jsmind_container").on("click", 'jmnode', function () {
-                //alert($(this).text());
-                //console.log($(this).attr("nodeid"))
+                dlgLoading = new Toast({ text: "加载中..." });
+                dlgLoading.Show();
                 add_SelectedNode($(this).attr("nodeid"));
+                if (dlgLoading) {
+                    dlgLoading.Close();
+                }
             });
 
         }
 
-        function add_SelectedNode(key0){
-            if(dataSubArea.hasOwnProperty(key0)){
+        //点击后
+        function add_SelectedNode(key0) {
+            if (dataSubArea.hasOwnProperty(key0)) {
                 let subNds = new Array();
                 for (let i = 0, len = dataSubArea[key0].length; i < len; i++) {
-                    let nd2= jm.add_node(dataSubArea[key0][i]["parentid"],dataSubArea[key0][i]["id"],dataSubArea[key0][i]["topic"]);
-                    if(dataSubArea[key0][i]["parentid"] == key0){
+                    let colorStr = dataSubArea[key0][i]["background-color"] || "#428bca";
+                    let nd2 = jm.add_node(dataSubArea[key0][i]["parentid"], dataSubArea[key0][i]["id"], dataSubArea[key0][i]["topic"], { "background-color": colorStr });
+                    if (dataSubArea[key0][i]["parentid"] == key0) {
                         subNds.push(nd2);
                     }
                 }
@@ -87,10 +111,9 @@
 
                 //添加完之后清空 避免重复添加
                 delete dataSubArea[key0];
-                 
             }
         }
-
+        //数据加载
         function open_ajax() {
             var mind_url = './example.json';
             jsMind.util.ajax.get(mind_url, function (res) {
@@ -115,22 +138,40 @@
                     if (dataSubArea.hasOwnProperty(key0) == false) {
                         dataSubArea[key0] = [];
                     }
-
-                    dataSubArea[key0].push({ "id": item0["area"], "parentid": key0, "topic": item0["area"], "expanded": false });
-                    let key1 = item0["area"];
+                    //区+具体地址
+                    let key1 = item0["zone"] +item0["area"];
+                    dataSubArea[key0].push({ "id": key1, "parentid": key0, "topic": item0["area"], "expanded": false });
                     //日期
                     for (let j = 0, len2 = item0["d"].length; j < len2; j++) {
                         if (dataSubArea.hasOwnProperty(key1) == false) {
                             dataSubArea[key1] = [];
                         }
-                        dataSubArea[key1].push({ "id": key1 + item0["d"][j], "parentid": key1, "topic": item0["d"][j], "background-color": "coral" });
+                        let colorStr = "deepskyblue";
+                        if(j == len2 - 1){
+                            colorStr = "darkblue";
+                        }
+                        dataSubArea[key1].push({ "id": key1 + item0["d"][j], "parentid": key1, "topic": item0["d"][j], "background-color": colorStr});
+                        //计算最近一次发现阳性的天数
+                        if (j == len2 - 1) {
+                            let day1 = getDaySpan(item0["d"][j]);
+                            if(day1 <= 7){
+                                //封控区
+                                dataSubArea[key0][dataSubArea[key0].length - 1]["background-color"] = "red";
+                            }else if(day1 >7 && day1 <= 14){
+                                //管控区
+                                dataSubArea[key0][dataSubArea[key0].length - 1]["background-color"] = "coral";
+                            }else{
+                                //防范区
+                            }
+                        }
                     }
-
-                    //mind["data"].push({ "id":item0["area"], "parentid": key0, "topic": item0["area"],"expanded": false});
-
-
                 }
                 load_jsmind();
+                //记录日期
+                $("#daterecord").text("数据更新日期:" + res.history[res.history.length - 1]);
+                if (dlgLoading) {
+                    dlgLoading.Close();
+                }
             });
         }
 
@@ -138,12 +179,10 @@
             const canvas = document.getElementById("jsmind");
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-
-            // const div0 = document.getElementById("jsmind_container");
-            // div0.width = window.innerWidth;
-            // div0.height = window.innerHeight;
-
-            //load_jsmind();
+            //显示加载
+            dlgLoading = new Toast({ text: "加载中..." });
+            dlgLoading.Show();
+            //加载数据
             open_ajax();
 
         }

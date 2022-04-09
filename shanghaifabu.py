@@ -94,6 +94,7 @@ if __name__ == "__main__":
         objResult = obj1
     childrens = objResult.get("childrens",[])
     zones=objResult.get("zones",["浦东新区","黄浦区","静安区","徐汇区","长宁区","普陀区","虹口区","杨浦区","宝山区","闵行区","嘉定区","金山区","松江区","青浦区","奉贤区","崇明区"])
+    history= objResult.get("history",[])
     #检索区域
     def findzone(str1):
         for strZone in zones:
@@ -117,6 +118,10 @@ if __name__ == "__main__":
 
     zone1 = ""
     for oUrl in urls:
+        #判断是否已经读取过
+        if oUrl["d"] in history:
+            continue
+        history.append(oUrl["d"])
         arr2 = GetSpanLines(oUrl["url"])
         for str2 in arr2:
             if str2:
@@ -132,4 +137,5 @@ if __name__ == "__main__":
         #输出
         objResult["zones"]=zones
         objResult["childrens"]=childrens
+        objResult["history"]=history
         _write("./example.json", json.dumps(objResult, sort_keys=False, ensure_ascii=False, separators=(',', ':')))
