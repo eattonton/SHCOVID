@@ -1,4 +1,4 @@
-# coding:utf-8
+# -*- coding: utf-8 -*-
 import os, sys
 import json
 import requests
@@ -6,6 +6,7 @@ import time,datetime
 import re
 import codecs
 from bs4 import BeautifulSoup
+from pypinyin import lazy_pinyin
 
 userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36"
 rootUrl = "mp.weixin.qq.com"
@@ -45,7 +46,9 @@ def _read(fNa, fileCode='utf-8'):
 def _readJson(fNa, fileCode='utf-8'):
     sdata = _read(fNa,fileCode)
     sdata = sdata.replace('\ufeff','').replace('\r\n','')
-    return json.loads(sdata)
+    if sdata:
+        return json.loads(sdata)
+    return {}
 
 def GetSpanLines(url):
     arr1 = []
@@ -59,18 +62,24 @@ def GetSpanLines(url):
             if spanItem and spanItem[0].string:
                 arr1.append(spanItem[0].string)
             elif spanItem[0].contents and len(spanItem[0].contents) > 0:
-                arr1.append(spanItem[0].contents[0])
+                str1=""
+                for sp1 in spanItem[0].contents:
+                    if sp1.string:
+                        str1 = str1 + sp1.string
+                if str1:
+                    arr1.append(str1)
     return arr1
  
 if __name__ == "__main__":
     urls = []
+    urls.append({"d":"2022-04-06","url":"https://mp.weixin.qq.com/s/8bljTUplPh1q4MXb6wd_gg"})
     urls.append({"d":"2022-04-07","url":"https://mp.weixin.qq.com/s/HTM47mUp0GF-tWXkPeZJlg"})
+    urls.append({"d":"2022-04-08","url":"https://mp.weixin.qq.com/s/79NsKhMHbg09Y0xaybTXjA"})
     objResult = {}
     #读取原先的数据
     obj1 = _readJson("./example.json")
     if obj1:
         objResult = obj1
-        print(objResult)
     childrens = objResult.get("childrens",[])
     zones=objResult.get("zones",["浦东新区","黄浦区","静安区","徐汇区","长宁区","普陀区","虹口区","杨浦区","宝山区","闵行区","嘉定区","金山区","松江区","青浦区","奉贤区","崇明区"])
     #检索区域
@@ -82,6 +91,10 @@ if __name__ == "__main__":
 
     #检索是否存在原先的记录
     def findarea(strDate, strZone, strArea):
+        if not strArea:
+            return
+        if "年" in strArea and "月" in strArea and "日" in strArea:
+            return
         for oArea in childrens:
             if oArea["area"] == strArea:
                 if strDate not in oArea["d"]:
@@ -98,13 +111,13 @@ if __name__ == "__main__":
                 zone2 = findzone(str2)
                 if zone2 != "":
                     zone1 = zone2
-                if zone1 != "" and len(str2) < 20:
-                    findarea(oUrl["d"], zone1, str2.replace(' ', '').replace('，', '').replace('。', '').replace('\ufeff','').replace('\u00a0',''))
+                if zone1 != "" and isinstance(str2,str) and len(str2) < 20 and "落实终末消毒措施" not in str2:
+                    findarea(oUrl["d"], zone1, str2.replace(' ', '').replace('，', '').replace('。', '').replace('、', '').replace('\u00a0',''))
 
     if childrens and len(childrens) > 0:
         #排序
-        childrens.sort(key=lambda x: x["area"])
+        childrens.sort(key=lambda x: lazy_pinyin(x["area"][0])[0][0])
         #输出
         objResult["zones"]=zones
         objResult["childrens"]=childrens
-        _write("./example.json", json.dumps(objResult, sort_keys=True, ensure_ascii=False, separators=(',', ':')))
+        _write("./example.json", json.dumps(objResult, sort_keys=False, ensure_ascii=False, separators=(',', ':')))

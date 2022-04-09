@@ -76,10 +76,11 @@
                     let item0 = datas[i];
                     let key0 = item0["area"].substring(0,1);
                     if(subKeys.indexOf(key0) == -1){
+                        //填加索引字段
                         mind["data"].push({ "id":key0, "parentid": item0["zone"], "topic": key0,"expanded": false });
                         subKeys.push(key0);
                     }
-                    mind["data"].push({ "id":item0["area"], "parentid": key0, "topic": item0["area"]});
+                    mind["data"].push({ "id":item0["area"], "parentid": key0, "topic": item0["area"],"expanded": false});
                     for(let j=0,len2=item0["d"].length; j< len2;j++){
                         mind["data"].push({ "id":item0["area"]+item0["d"][j], "parentid": item0["area"], "topic": item0["d"][j], "background-color":"coral"});
                     }
