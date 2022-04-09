@@ -6,11 +6,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0,minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>jsMind</title>
+    <title>上海疫情来自上海发布</title>
     <link type="text/css" rel="stylesheet" href="./js/jsmind.css">
     <style type="text/css">
-        #jsmind_container {
+        *{
+            margin: 0;
+            padding: 0;
+        }
 
+        #jsmind_container {
             border: solid 1px #ccc;
             /*background:#f4f4f4;*/
             background: #f4f4f4;
@@ -38,22 +42,7 @@
             "format": "node_array",
             "data": [
                 { "id": "root", "isroot": true, "topic": "上海发布" },
-                { "id": "浦东新区", "parentid": "root", "topic": "浦东新区","expanded": false },
-                { "id": "黄浦区", "parentid": "root", "topic": "黄浦区","expanded": false  },
-                { "id": "静安区", "parentid": "root", "topic": "静安区","expanded": false  },
-                { "id": "徐汇区", "parentid": "root", "topic": "徐汇区","expanded": false  },
-                { "id": "长宁区", "parentid": "root", "topic": "长宁区","expanded": false  },
-                { "id": "普陀区", "parentid": "root", "topic": "普陀区","expanded": false  },
-                { "id": "虹口区", "parentid": "root", "topic": "虹口区","expanded": false  },
-                { "id": "杨浦区", "parentid": "root", "topic": "杨浦区","expanded": false  },
-                { "id": "宝山区", "parentid": "root", "topic": "宝山区","expanded": false  },
-                { "id": "闵行区", "parentid": "root", "topic": "闵行区","expanded": false  },
-                { "id": "嘉定区", "parentid": "root", "topic": "嘉定区","expanded": false  },
-                { "id": "金山区", "parentid": "root", "topic": "金山区","expanded": false  },
-                { "id": "松江区", "parentid": "root", "topic": "松江区","expanded": false  },
-                { "id": "青浦区", "parentid": "root", "topic": "青浦区","expanded": false  },
-                { "id": "奉贤区", "parentid": "root", "topic": "奉贤区","expanded": false  },
-                { "id": "崇明区", "parentid": "root", "topic": "崇明区","expanded": false  },
+               
             ]
         };
 
@@ -74,8 +63,15 @@
         
         function open_ajax() {
             var mind_url = './example.json';
-            jsMind.util.ajax.get(mind_url, function (datas) {
+            jsMind.util.ajax.get(mind_url, function (res) {
                 let subKeys = new Array();
+                let zones = res.zones;
+                //区
+                for(let i=0,len=zones.length;i<len;i++){
+                    mind["data"].push({ "id":zones[i], "parentid": "root", "topic": zones[i],"expanded": false });
+                }
+                //输出居住区域
+                let datas = res.childrens;
                 for(let i=0,len=datas.length;i<len;i++){
                     let item0 = datas[i];
                     let key0 = item0["area"].substring(0,1);
