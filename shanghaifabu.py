@@ -7,6 +7,7 @@ import re
 import codecs
 from bs4 import BeautifulSoup
 from pypinyin import lazy_pinyin
+import zipfile
 
 userAgent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36"
 rootUrl = "mp.weixin.qq.com"
@@ -69,27 +70,12 @@ def GetSpanLines(url):
                 if str1:
                     arr1.append(str1)
     return arr1
- 
-if __name__ == "__main__":
-    urls = []
-    urls.append({"d":"2022-03-25","url":"https://mp.weixin.qq.com/s/XG03jIjQLLLjaJZ1DD-kAg"})
-    urls.append({"d":"2022-03-26","url":"https://mp.weixin.qq.com/s/JwUn4sVxSvHQs5KoyFn-lw"})
-    urls.append({"d":"2022-03-27","url":"https://mp.weixin.qq.com/s/MfBzdO0bG4fbokKTRCWuIw"})
-    urls.append({"d":"2022-03-28","url":"https://mp.weixin.qq.com/s/656rotFOMeDScnKSt6OmyQ"})
-    urls.append({"d":"2022-03-29","url":"https://mp.weixin.qq.com/s/K6jT1wRMSScBhvxcB2yV4g"})
-    urls.append({"d":"2022-03-30","url":"https://mp.weixin.qq.com/s/SSFVzOSXPTj-aLzR1tdtxw"})
-    urls.append({"d":"2022-03-31","url":"https://mp.weixin.qq.com/s/hnrGo4KvUvxhpjFyiE8-sQ"})
-    urls.append({"d":"2022-04-01","url":"https://mp.weixin.qq.com/s/gQDyFLtdILP2NuSBgcjUxg"})
-    urls.append({"d":"2022-04-02","url":"https://mp.weixin.qq.com/s/2VWTo6e9gmWJ0vxeZ4PhIw"})
-    urls.append({"d":"2022-04-03","url":"https://mp.weixin.qq.com/s/uj4TYASUn2YJZQMg2aUvdw"})
-    urls.append({"d":"2022-04-04","url":"https://mp.weixin.qq.com/s/MkKsQkgvUWbwj8z9jG_Zng"})
-    urls.append({"d":"2022-04-05","url":"https://mp.weixin.qq.com/s/djwW3S9FUYBE2L5Hj94a3A"})
-    urls.append({"d":"2022-04-06","url":"https://mp.weixin.qq.com/s/8bljTUplPh1q4MXb6wd_gg"})
-    urls.append({"d":"2022-04-07","url":"https://mp.weixin.qq.com/s/HTM47mUp0GF-tWXkPeZJlg"})
-    urls.append({"d":"2022-04-08","url":"https://mp.weixin.qq.com/s/79NsKhMHbg09Y0xaybTXjA"})
+
+#读取上海新冠数据
+def GetSHCOVIDJSON(urls,file2):
     objResult = {}
     #读取原先的数据
-    obj1 = _readJson("./example.json")
+    obj1 = _readJson(file2)
     if obj1:
         objResult = obj1
     childrens = objResult.get("childrens",[])
@@ -138,4 +124,36 @@ if __name__ == "__main__":
         objResult["zones"]=zones
         objResult["childrens"]=childrens
         objResult["history"]=history
-        _write("./example.json", json.dumps(objResult, sort_keys=False, ensure_ascii=False, separators=(',', ':')))
+        _write(file2, json.dumps(objResult, sort_keys=False, ensure_ascii=False, separators=(',', ':')))
+    return file2
+    
+def ZipJSON(file1):
+    _name = os.path.join(os.path.basename(file1))
+    _name2 = _name.split('.')[0]+".zip"
+    file2 = "./"+_name2
+    with zipfile.ZipFile(file2, "w", compression=zipfile.ZIP_DEFLATED) as zip:
+        if (os.path.exists(file1)):
+            zip.write(file1, arcname=_name)
+        else:
+            print("file not exist %s" % file1)
+        zip.close()
+
+if __name__ == "__main__":
+    urls = []
+    urls.append({"d":"2022-03-25","url":"https://mp.weixin.qq.com/s/XG03jIjQLLLjaJZ1DD-kAg"})
+    urls.append({"d":"2022-03-26","url":"https://mp.weixin.qq.com/s/JwUn4sVxSvHQs5KoyFn-lw"})
+    urls.append({"d":"2022-03-27","url":"https://mp.weixin.qq.com/s/MfBzdO0bG4fbokKTRCWuIw"})
+    urls.append({"d":"2022-03-28","url":"https://mp.weixin.qq.com/s/656rotFOMeDScnKSt6OmyQ"})
+    urls.append({"d":"2022-03-29","url":"https://mp.weixin.qq.com/s/K6jT1wRMSScBhvxcB2yV4g"})
+    urls.append({"d":"2022-03-30","url":"https://mp.weixin.qq.com/s/SSFVzOSXPTj-aLzR1tdtxw"})
+    urls.append({"d":"2022-03-31","url":"https://mp.weixin.qq.com/s/hnrGo4KvUvxhpjFyiE8-sQ"})
+    urls.append({"d":"2022-04-01","url":"https://mp.weixin.qq.com/s/gQDyFLtdILP2NuSBgcjUxg"})
+    urls.append({"d":"2022-04-02","url":"https://mp.weixin.qq.com/s/2VWTo6e9gmWJ0vxeZ4PhIw"})
+    urls.append({"d":"2022-04-03","url":"https://mp.weixin.qq.com/s/uj4TYASUn2YJZQMg2aUvdw"})
+    urls.append({"d":"2022-04-04","url":"https://mp.weixin.qq.com/s/MkKsQkgvUWbwj8z9jG_Zng"})
+    urls.append({"d":"2022-04-05","url":"https://mp.weixin.qq.com/s/djwW3S9FUYBE2L5Hj94a3A"})
+    urls.append({"d":"2022-04-06","url":"https://mp.weixin.qq.com/s/8bljTUplPh1q4MXb6wd_gg"})
+    urls.append({"d":"2022-04-07","url":"https://mp.weixin.qq.com/s/HTM47mUp0GF-tWXkPeZJlg"})
+    urls.append({"d":"2022-04-08","url":"https://mp.weixin.qq.com/s/79NsKhMHbg09Y0xaybTXjA"})
+    file1 = GetSHCOVIDJSON(urls, "./sh.json")
+    ZipJSON(file1)

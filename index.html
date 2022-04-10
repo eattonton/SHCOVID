@@ -38,10 +38,12 @@
         </div>
     </div>
     <div>author: eattonton@qq.com</div>
+    <div>supported by: jsmind,jszip,triweb</div>
     <script type="text/javascript" src="./js/jquery-2.1.1.min.js"></script>
     <script type="text/javascript" src="./js/jsmind.min.js"></script>
-    <script type="text/javascript" src="./js/jsmind.draggable.min.js"></script> 
+    <script type="text/javascript" src="./js/jsmind.draggable.min.js"></script>
     <script type="text/javascript" src="./js/ttui.min.js"></script>
+    <script type="text/javascript" src="./js/jszip.min.js"></script>
     <script type="text/javascript">
         var mind = {
             "meta": {
@@ -79,7 +81,12 @@
             var options = {
                 container: 'jsmind_container',
                 editable: true,
-                theme: 'primary'
+                theme: 'primary',
+                default_event_handle: {
+                    enable_mousedown_handle: true,
+                    enable_click_handle: true,
+                    enable_dblclick_handle: false
+                }
             }
             jm = jsMind.show(options, mind);
             //jm.set_node_color('sub21', 'green', '#ccc');
@@ -117,28 +124,51 @@
         }
         //数据加载
         function open_ajax() {
-            var mind_url = './example.json';
-            jsMind.util.ajax.get(mind_url, function (res) {
-                let zones = res.zones;
-                //区
-                for (let i = 0, len = zones.length; i < len; i++) {
-                    mind["data"].push({ "id": zones[i], "parentid": "root", "topic": zones[i], "expanded": false });
-                }
-                //输出居住区域
-                collactLevel0(res.childrens);
-                for(let k0 in dataLevel0){
-                    mind["data"].push(dataLevel0[k0]);
-                }
-                for(let k1 in dataLevel1){
-                    mind["data"].push(dataLevel1[k1]);
-                }
-                load_jsmind();
-                //记录日期
-                $("#daterecord").text("数据更新日期:" + res.history[res.history.length - 1]);
-                if (dlgLoading) {
-                    dlgLoading.Close();
-                }
+            var mind_url = './sh.zip';
+            jsMind.util.ajax.blob(mind_url, function (res) {
+                let zip = new JSZip();
+                zip.loadAsync(res).then(res => {
+                    //res.files里包含整个zip里的文件描述、目录描述列表
+                    //res本身就是JSZip的实例
+                    for (let key in res.files) {
+                        //判断是否是目录
+                        if (!res.files[key].dir) {
+                            //找到我们压缩包所需要的json文件
+                            if (/\.(json)$/.test(res.files[key].name)) {
+                                res.file(res.files[key].name).async('string')
+                                    .then(content => {
+                                        //得到我们需要的JSON文件内容
+                                        loadJSONData(JSON.parse(content));
+                                    })
+                            }
+                        }
+                    }
+
+                })
+                return;
             });
+        }
+
+        function loadJSONData(res) {
+            let zones = res.zones;
+            //区
+            for (let i = 0, len = zones.length; i < len; i++) {
+                mind["data"].push({ "id": zones[i], "parentid": "root", "topic": zones[i], "expanded": false });
+            }
+            //输出居住区域
+            collactLevel0(res.childrens);
+            for (let k0 in dataLevel0) {
+                mind["data"].push(dataLevel0[k0]);
+            }
+            for (let k1 in dataLevel1) {
+                mind["data"].push(dataLevel1[k1]);
+            }
+            load_jsmind();
+            //记录日期
+            $("#daterecord").text("数据更新日期:" + res.history[res.history.length - 1]);
+            if (dlgLoading) {
+                dlgLoading.Close();
+            }
         }
 
         //添加子集 并 分类
@@ -183,17 +213,17 @@
             }
 
             //如果数量多 就分二级
-            for(let k0 in dataSubArea){
-                if(dataSubArea[k0].length > 10){
+            for (let k0 in dataSubArea) {
+                if (dataSubArea[k0].length > 10) {
                     collactLevel1(k0, dataSubArea[k0]);
                     delete dataSubArea[k0];
                 }
             }
         }
         //如果分一层数量太多，就分二层
-        function collactLevel1(key0, datas){
+        function collactLevel1(key0, datas) {
             //提取关键字
-            for(let i=0,len=datas.length; i< len;i++){
+            for (let i = 0, len = datas.length; i < len; i++) {
                 let item1 = datas[i];
                 let key1 = key0 + item1["topic"].substring(1, 2);
                 let txtKey1 = item1["topic"].substring(0, 2);

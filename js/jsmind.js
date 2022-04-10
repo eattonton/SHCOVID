@@ -916,12 +916,17 @@
                     if (xhr.readyState == 4) {
                         if (xhr.status == 200 || xhr.status == 0) {
                             if (typeof callback === 'function') {
-                                var data = jm.util.json.string2json(xhr.responseText);
-                                if (data != null) {
-                                    callback(data);
+                                if (method == "BLOB") {
+                                    callback(xhr.response);
                                 } else {
-                                    callback(xhr.responseText);
+                                    var data = jm.util.json.string2json(xhr.responseText);
+                                    if (data != null) {
+                                        callback(data);
+                                    } else {
+                                        callback(xhr.responseText);
+                                    }
                                 }
+
                             }
                         } else {
                             if (typeof fail_callback === 'function') {
@@ -933,12 +938,20 @@
                     }
                 }
                 method = method || 'GET';
-                xhr.open(method, url, true);
+                if(method == 'BLOB'){
+                    xhr.open('GET', url, true);
+                }else{
+                    xhr.open(method, url, true);
+                }
+                
                 //xhr.setRequestHeader('If-Modified-Since', '0');
                 //xhr.setRequestHeader('Content-Type','application/json');
                 if (method == 'POST') {
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
                     xhr.send(p);
+                } else if (method == 'BLOB') {
+                    xhr.responseType = 'blob';
+                    xhr.send();
                 } else {
                     xhr.send();
                 }
@@ -948,7 +961,10 @@
             },
             post: function (url, param, callback) {
                 return jm.util.ajax.request(url, param, 'POST', callback);
-            }
+            },
+            blob: function (url, callback) {
+                return jm.util.ajax.request(url, {}, 'BLOB', callback);
+            },
         },
 
         dom: {
