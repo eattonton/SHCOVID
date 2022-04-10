@@ -189,13 +189,13 @@
                 let key1 = item0["zone"] + item0["area"];
                 dataSubArea[key0].push({ "id": key1, "parentid": key0, "topic": item0["area"], "expanded": false });
                 //日期
-                for (let j = 0, len2 = item0["d"].length; j < len2; j++) {
+                for (let j = item0["d"].length-1; j >=0; j--) {
                     if (dataSubArea.hasOwnProperty(key1) == false) {
                         dataSubArea[key1] = [];
                     }
                     dataSubArea[key1].push({ "id": key1 + item0["d"][j], "parentid": key1, "topic": item0["d"][j], "background-color": "deepskyblue" });
                     //计算最近一次发现阳性的天数
-                    if (j == len2 - 1) {
+                    if (j == item0["d"].length - 1) {
                         let day1 = getDaySpan(item0["d"][j]);
                         if (day1 <= 7) {
                             //封控区
@@ -208,6 +208,10 @@
                         } else {
                             //防范区
                         }
+                    }
+                    //最多显示6个
+                    if(dataSubArea[key1].length>5){
+                        break;
                     }
                 }
             }
