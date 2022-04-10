@@ -105,18 +105,18 @@
         //点击后
         function add_SelectedNode(key0) {
             if (dataSubArea.hasOwnProperty(key0)) {
-                let subNds = new Array();
+               // let subNds = new Array();
                 for (let i = 0, len = dataSubArea[key0].length; i < len; i++) {
                     let colorStr = dataSubArea[key0][i]["background-color"] || "#428bca";
                     let nd2 = jm.add_node(dataSubArea[key0][i]["parentid"], dataSubArea[key0][i]["id"], dataSubArea[key0][i]["topic"], { "background-color": colorStr });
-                    if (dataSubArea[key0][i]["parentid"] == key0) {
-                        subNds.push(nd2);
-                    }
+                   // if (dataSubArea[key0][i]["parentid"] == key0) {
+                   //     subNds.push(nd2);
+                   // }
                 }
 
-                for (let i = 0, len = subNds.length; i < len; i++) {
-                    jm.collapse_node(subNds[i]);
-                }
+                //for (let i = 0, len = subNds.length; i < len; i++) {
+                //    jm.collapse_node(subNds[i]);
+               // }
 
                 //添加完之后清空 避免重复添加
                 delete dataSubArea[key0];
@@ -209,9 +209,9 @@
                             //防范区
                         }
                     }
-                    //最多显示7个
-                    if(dataSubArea[key1].length>6){
-                        break;
+                    //最多显示时间个数
+                    if(dataSubArea[key1].length >= 9){
+                       break;
                     }
                 }
             }
