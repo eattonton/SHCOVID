@@ -119,6 +119,8 @@ def GetSHCOVIDJSON(urls,file2):
             return
         if "年" in strArea and "月" in strArea and "日" in strArea:
             return
+        if "更多" in strArea or "消毒" in strArea:
+            return
         for oArea in childrens:
             if oArea["area"] == strArea and oArea["zone"] == strZone:
                 if strDate not in oArea["d"]:
@@ -139,7 +141,7 @@ def GetSHCOVIDJSON(urls,file2):
                 zone2 = findzone(str2)
                 if zone2 != "":
                     zone1 = zone2
-                if zone1 != "" and isinstance(str2,str) and len(str2) < 20 and "落实终末消毒措施" not in str2:
+                if zone1 != "" and isinstance(str2,str) and len(str2) < 20:
                     findarea(oUrl["d"], zone1, str2.replace(' ', '').replace('，', '').replace('。', '').replace('、', '').replace(',', '').replace('\u00a0',''))
 
     if childrens and len(childrens) > 0:
@@ -190,9 +192,10 @@ if __name__ == "__main__":
     urls.append({"d":"2022-04-07","url":"https://mp.weixin.qq.com/s/HTM47mUp0GF-tWXkPeZJlg"})
     urls.append({"d":"2022-04-08","url":"https://mp.weixin.qq.com/s/79NsKhMHbg09Y0xaybTXjA"})
     urls.append({"d":"2022-04-09","url":"https://mp.weixin.qq.com/s/_Je5_5_HqBcs5chvH5SFfA"})
+    urls.append({"d":"2022-04-10","url":"https://mp.weixin.qq.com/s/u0XfHF8dgfEp8vGjRtcwXA"})
     file1 = GetSHCOVIDJSON(urls, "./sh.json")
     ZipJSON(file1)
-    #arr1 = GetSpanLines("https://mp.weixin.qq.com/s/_Je5_5_HqBcs5chvH5SFfA")
+    #arr1 = GetSpanLines("https://mp.weixin.qq.com/s/u0XfHF8dgfEp8vGjRtcwXA")
     #print(arr1)
     #2022-04-09
     urls2 = []
