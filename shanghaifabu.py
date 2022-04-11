@@ -146,7 +146,7 @@ def GetSHCOVIDJSON(urls,file2):
 
     if childrens and len(childrens) > 0:
         #排序
-        childrens.sort(key=lambda x: (lazy_pinyin(x["area"][0])[0][0],lazy_pinyin(x["area"][1])[0][0]))
+        childrens.sort(key=lambda x: (lazy_pinyin(x["area"][0])[0],lazy_pinyin(x["area"][1])[0]))
         #输出
         objResult["zones"]=zones
         objResult["childrens"]=childrens
