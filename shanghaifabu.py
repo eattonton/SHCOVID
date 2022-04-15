@@ -62,17 +62,17 @@ def GetSpanLines(url):
             #spanItem = pItem.findAll('span',{'style':'font-size: 16px;'})
             spanItems = pItem.findAll('span')
             if spanItems:
+                str1=""
                 for spanItem in spanItems:
                     if 'font-size: 16px;' in str(spanItem) and 'data-src' not in str(spanItem):
                         if spanItem and spanItem.string:
-                            arr1.append(spanItem.string)
+                            str1 = str1 + spanItem.string
                         elif spanItem.contents and len(spanItem.contents) > 0:
-                            str1=""
                             for sp1 in spanItem.contents:
                                 if sp1.string:
                                     str1 = str1 + sp1.string
-                            if str1:
-                                arr1.append(str1)
+                if str1:
+                    arr1.append(str1)
     return arr1
 
 def GetSpanLines2(url):
@@ -119,7 +119,7 @@ def GetSHCOVIDJSON(urls,file2):
             return
         if "年" in strArea and "月" in strArea and "日" in strArea:
             return
-        if "更多" in strArea or "消毒" in strArea:
+        if "更多" in strArea or "消毒" in strArea or "资料" in strArea or "编辑" in strArea:
             return
         for oArea in childrens:
             if oArea["area"] == strArea and oArea["zone"] == strZone:
@@ -141,8 +141,9 @@ def GetSHCOVIDJSON(urls,file2):
                 zone2 = findzone(str2)
                 if zone2 != "":
                     zone1 = zone2
-                if zone1 != "" and isinstance(str2,str) and len(str2) < 20:
-                    findarea(oUrl["d"], zone1, str2.replace(' ', '').replace('，', '').replace('。', '').replace('、', '').replace(',', '').replace('\u00a0',''))
+                str2 = str2.replace(' ', '').replace('，', '').replace('。', '').replace('、', '').replace(',', '').replace('\u00a0','')
+                if zone1 != "" and isinstance(str2,str) and len(str2) < 20 and len(str2) > 1:
+                    findarea(oUrl["d"], zone1, str2)
 
     if childrens and len(childrens) > 0:
         #排序
@@ -196,6 +197,7 @@ if __name__ == "__main__":
     urls.append({"d":"2022-04-11","url":"https://mp.weixin.qq.com/s/vxFiV2HeSvByINUlTmFKZA"})
     urls.append({"d":"2022-04-12","url":"https://mp.weixin.qq.com/s/OZGM-pNkefZqWr0IFRJj1g"})
     urls.append({"d":"2022-04-13","url":"https://mp.weixin.qq.com/s/L9AffT-SoEBV4puBa_mRqg"})
+    urls.append({"d":"2022-04-14","url":"https://mp.weixin.qq.com/s/5T76lht3s6g_KTiIx3XAYw"})
     file1 = GetSHCOVIDJSON(urls, "./sh.json")
     ZipJSON(file1)
     #arr1 = GetSpanLines("https://mp.weixin.qq.com/s/u0XfHF8dgfEp8vGjRtcwXA")
