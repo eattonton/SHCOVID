@@ -119,7 +119,7 @@ def GetSHCOVIDJSON(urls,file2):
             return
         if "年" in strArea and "月" in strArea and "日" in strArea:
             return
-        if "更多" in strArea or "消毒" in strArea or "资料" in strArea or "编辑" in strArea:
+        if "更多" in strArea or "消毒" in strArea or "资料" in strArea or "编辑" in strArea or "资料" in strArea:
             return
         for oArea in childrens:
             if oArea["area"] == strArea and oArea["zone"] == strZone:
