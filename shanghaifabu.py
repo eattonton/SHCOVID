@@ -216,6 +216,7 @@ if __name__ == "__main__":
     urls.append({"d":"2022-04-28","url":"https://mp.weixin.qq.com/s/aDU54MGe9XPWEMrdKMRFww"})
     urls.append({"d":"2022-04-29","url":"https://mp.weixin.qq.com/s/aQMZ8WmeYEaBPFv0yVs4BQ"})
     urls.append({"d":"2022-04-30","url":"https://mp.weixin.qq.com/s/qbB7VjEXMTK0zB6JIqBbAA"})
+    urls.append({"d":"2022-05-01","url":"https://mp.weixin.qq.com/s/agdZHOqVZh9atNHOQEFTog"})
     file1 = GetSHCOVIDJSON(urls, "./sh.json")
     ZipJSON(file1)
     #arr1 = GetSpanLines("https://mp.weixin.qq.com/s/u0XfHF8dgfEp8vGjRtcwXA")
